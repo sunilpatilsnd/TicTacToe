@@ -79,3 +79,16 @@ body {
   text-align: center;
   font-size: 14px;
 }
+main {
+  min-height: 98vh;
+}
+button {
+  height: 40px;
+  width: 40px;
+}
+header {
+  height: 10vh;
+}
+.current {
+  background-color: lightgreen;
+}
