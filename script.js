@@ -1,10 +1,6 @@
-const createGameBoard = function (name) {
-  //This is a Gameboard object it has  name, board (2D array)
+const GameBoard = (function () {
+  board = [];
 
-  this.name = name;
-  const board = [];
-
-  // init method fills the board with null value
   const init = function () {
     for (let i = 0; i < 3; i++) {
       const arr = [];
@@ -17,21 +13,141 @@ const createGameBoard = function (name) {
 
   init(); //runs init function
 
-  const play = function (i, j, marker) {
-    // play method takes row and column index and a marker and
-    // checks if the game is over and returns boolean value of the same.
+  return { board };
+})();
 
-    if (board[i][j] === null && isGameOver(marker) == false) {
-      board[i][j] = marker;
-      // console.table(board);
-      return isGameOver(marker);
-    }
+const createPlayer = function (name, marker) {
+  // creates a player with name and marker and score initialized to zero
+  // provides incrementScore to add 1 point to player score.
 
-    return false;
+  this.name = name;
+  this.marker = marker;
+  this.score = 0;
+
+  function getScore() {
+    return this.score;
+  }
+
+  this.incrementScore = () => score++;
+  return { name, getScore, incrementScore, marker };
+};
+
+const screenController = (function () {
+  const createGameDOM = function (player1, player2, board) {
+    createGameBoardUI(board);
+    createPlayerCard(player1);
+    createPlayerCard(player2);
   };
 
-  const isGameOver = function (marker) {
-    //isGameOver method takes in a marker as input and checks if the winning
+  const createPlayerCard = function (player) {
+    const container = document.querySelector(".playersContainer");
+    const playerInfo = document.createElement("div");
+    const playerName = document.createElement("h2");
+    const playerMarker = document.createElement("h3");
+    const playerScore = document.createElement("p");
+
+    playerInfo.classList.add("player-card");
+
+    playerName.textContent = player.name;
+    playerMarker.textContent = `marker: ${player.marker}`;
+    playerScore.textContent = `Score: ${player.score}`;
+
+    playerInfo.appendChild(playerName);
+    playerInfo.appendChild(playerMarker);
+    playerInfo.appendChild(playerScore);
+
+    container.appendChild(playerInfo);
+  };
+
+  const createGameBoardUI = function (board) {
+    const container = document.querySelector(".gameContainer");
+    const boardContainer = document.createElement("div");
+    const boardName = document.createElement("h1");
+
+    boardContainer.id = board.name;
+    boardName.textContent = board.name;
+
+    boardContainer.appendChild(boardName);
+
+    const rowLength = board.length;
+    const colLength = board.length;
+
+    for (let i = 0; i < rowLength; i++) {
+      const row = document.createElement("div");
+      for (j = 0; j < colLength; j++) {
+        const colItem = document.createElement("button");
+        colItem.textContent = board[i][j];
+        colItem.dataset.row = i;
+        colItem.dataset.column = j;
+
+        colItem.addEventListener("click", (event) => {
+          playTurn(event);
+          // updateScreen(player1, player2, board, currPlayer);
+        });
+
+        row.appendChild(colItem);
+      }
+      boardContainer.appendChild(row);
+    }
+
+    container.appendChild(boardContainer);
+  };
+
+  const playTurn = function (event) {
+    let i = event.target.dataset.row;
+    let j = event.target.dataset.column;
+
+    let currPlayer = GameController.getCurrPlayer();
+
+    if (GameController.getIsGameOver() == false) {
+      event.target.textContent =
+        event.target.textContent == ""
+          ? currPlayer.marker
+          : event.target.textContent;
+      GameController.playRound(i, j);
+    } else {
+      alert("Game Over!");
+      alert(`${currPlayer.name} Won!!`);
+    }
+
+    // console.log(GameController.getIsGameOver());
+  };
+
+  return { createGameDOM };
+})();
+
+const GameController = (function () {
+  const board = GameBoard.board;
+  // console.table(board);
+  const player1 = createPlayer("SuperMan", "X");
+  const player2 = createPlayer("Batman", "O");
+
+  let isGameOver = false;
+  let isGameTie = false;
+
+  let currPlayer = player1;
+
+  screenController.createGameDOM(player1, player2, board);
+
+  const toggleCurrentPlayer = function () {
+    currPlayer = currPlayer == player1 ? player2 : player1;
+  };
+
+  const playRound = function (i, j) {
+    GameOverCheck(marker);
+
+    if (board[i][j] === null) {
+      board[i][j] = currPlayer.marker;
+      console.table(board);
+      GameOverCheck(currPlayer.marker);
+      if (isGameOver == false) {
+        toggleCurrentPlayer();
+      }
+    }
+  };
+
+  const GameOverCheck = function (marker) {
+    //GameOverCheck method takes in a marker as input and checks if the winning
     // patter exists for the provided marker and returns boolean true if exists else returns false
 
     let rowCompleted = false;
@@ -43,7 +159,6 @@ const createGameBoard = function (name) {
         r1.every((item) => item == marker) ||
         r2.every((item) => item == marker) ||
         r3.every((item) => item == marker);
-      // alert("rowCompleted " + rowCompleted);
     };
 
     const colMatcher = function () {
@@ -58,7 +173,6 @@ const createGameBoard = function (name) {
         col1.every((item) => item == marker) ||
         col2.every((item) => item == marker) ||
         col3.every((item) => item == marker);
-      // alert("colCompleted " + colCompleted);
     };
 
     const diagonalMatcher = function () {
@@ -78,124 +192,31 @@ const createGameBoard = function (name) {
     colMatcher(this.board);
     diagonalMatcher(this.board);
 
-    return rowCompleted || colCompleted || diagonalCompleted;
-  };
+    // console.log("rowCompleted: " + rowCompleted);
+    // console.log("colCompleted: " + colCompleted);
+    // console.log("diagonalCompleted: " + diagonalCompleted);
 
-  return { name, play, isGameOver, board };
-};
+    isGameOver = rowCompleted || colCompleted || diagonalCompleted;
 
-const createPlayer = function (name, marker) {
-  // creates a player with name and marker and score initialized to zero
-  // provides incrementScore to add 1 point to player score.
-
-  this.name = name;
-  this.marker = marker;
-  this.score = 0;
-
-  this.incrementScore = () => score++;
-  return { name, score, incrementScore, marker };
-};
-
-const screenController = (function () {
-  const createGameDOM = function (player1, player2, board, currPlayer) {
-    createGameBoardUI(player1, player2, board, currPlayer);
-    createPlayerCard(player1, currPlayer);
-    createPlayerCard(player2, currPlayer);
-  };
-
-  const createPlayerCard = function (player, currPlayer) {
-    const container = document.querySelector("main");
-    const playerInfo = document.createElement("div");
-    const playerName = document.createElement("h2");
-    const playerMarker = document.createElement("h3");
-    const playerScore = document.createElement("p");
-
-    playerName.textContent = player.name;
-    playerMarker.textContent = `marker: ${player.marker}`;
-    playerScore.textContent = `Score: ${player.score}`;
-
-    playerInfo.appendChild(playerName);
-    playerInfo.appendChild(playerMarker);
-    playerInfo.appendChild(playerScore);
-
-    if (currPlayer === player) {
-      playerInfo.classList.toggle("current");
-    }
-
-    container.appendChild(playerInfo);
-  };
-
-  const createGameBoardUI = function (player1, player2, board, currPlayer) {
-    const container = document.querySelector("main");
-    const boardContainer = document.createElement("div");
-    const boardName = document.createElement("h1");
-
-    const rowLength = board.board.length;
-    const colLength = board.board.length;
-
-    for (let i = 0; i < rowLength; i++) {
-      const row = document.createElement("div");
-      for (j = 0; j < colLength; j++) {
-        const colItem = document.createElement("button");
-        colItem.textContent = board.board[i][j];
-        colItem.dataset.row = i;
-        colItem.dataset.column = j;
-
-        colItem.addEventListener("click", (event) => {
-          playTurn(event);
-          // updateScreen(player1, player2, board, currPlayer);
-        });
-
-        row.appendChild(colItem);
-      }
-      boardContainer.appendChild(row);
-    }
-
-    const playTurn = function (event) {
-      let i = event.target.dataset.row;
-      let j = event.target.dataset.column;
-      let currPlayer = Game.toggleCurrentPlayer();
-      event.target.textContent = currPlayer.marker;
-      Game.playRound(i, j);
-      return currPlayer;
-    };
-
-    boardContainer.id = board.name;
-    boardName.textContent = board.name;
-
-    container.appendChild(boardContainer);
-  };
-
-  return { createGameDOM };
-})();
-
-const Game = (function () {
-  const board = createGameBoard("Tic-Tac-Toe");
-  const player1 = createPlayer("SuperMan", "X");
-  const player2 = createPlayer("Batman", "O");
-
-  let isGameOver = false;
-  let currPlayer = player1;
-
-  screenController.createGameDOM(player1, player2, board, currPlayer);
-
-  const toggleCurrentPlayer = function () {
-    currPlayer = currPlayer == player1 ? player2 : player1;
-    return currPlayer;
-  };
-
-  const playRound = function (i, j) {
-    if (!isGameOver) {
-      isGameOver = board.play(i, j, currPlayer.marker);
-      console.log(Game.isGameOver);
-    } else {
-      currPlayer = currPlayer == player1 ? player2 : player1;
-      alert(`${currPlayer.name} Won!`);
-    }
     return isGameOver;
   };
 
-  // currPlayer = currPlayer == player1 ? player2 : player1;
+  function getIsGameTie() {
+    return isGameTie;
+  }
 
-  return { board, toggleCurrentPlayer, playRound };
+  function getCurrPlayer() {
+    return currPlayer;
+  }
+  function getIsGameOver() {
+    return isGameOver;
+  }
+
+  return {
+    toggleCurrentPlayer,
+    playRound,
+    getCurrPlayer,
+    getIsGameOver,
+    getIsGameTie,
+  };
 })();
