@@ -29,7 +29,7 @@ const createPlayer = function (name, marker) {
   }
 
   this.incrementScore = () => score++;
-  return { name, getScore, incrementScore, marker };
+  return { name, getScore, incrementScore, marker, score };
 };
 
 const screenController = (function () {
@@ -121,6 +121,7 @@ const GameController = (function () {
   // console.table(board);
   const player1 = createPlayer("SuperMan", "X");
   const player2 = createPlayer("Batman", "O");
+  let winner = null;
 
   let isGameOver = false;
   let isGameTie = false;
@@ -131,28 +132,35 @@ const GameController = (function () {
 
   const toggleCurrentPlayer = function () {
     currPlayer = currPlayer == player1 ? player2 : player1;
+    return currPlayer;
   };
 
   const playRound = function (i, j) {
-    GameOverCheck(marker);
-
-    if (board[i][j] === null) {
-      board[i][j] = currPlayer.marker;
-      console.table(board);
-      GameOverCheck(currPlayer.marker);
-      if (isGameOver == false) {
-        toggleCurrentPlayer();
+    if (winner == null) {
+      if (isGameOver == false || isGameTie == false) {
+        // debugger;
+        if (board[i][j] === null) {
+          board[i][j] = currPlayer.marker;
+          console.table(board);
+          updateGameState();
+          toggleCurrentPlayer();
+        } else {
+          alert("This position is already marked: " + board[i][j]);
+        }
+      } else {
+        console.log("winner is: " + winner.name);
       }
+    } else {
+      alert("Game over and" + currPlayer.name + "Won");
     }
   };
 
-  const GameOverCheck = function (marker) {
-    //GameOverCheck method takes in a marker as input and checks if the winning
-    // patter exists for the provided marker and returns boolean true if exists else returns false
-
+  const updateGameState = function () {
     let rowCompleted = false;
     let colCompleted = false;
     let diagonalCompleted = false;
+
+    let marker = currPlayer.marker;
 
     const rowMatcher = function (r1, r2, r3) {
       rowCompleted =
@@ -198,7 +206,20 @@ const GameController = (function () {
 
     isGameOver = rowCompleted || colCompleted || diagonalCompleted;
 
-    return isGameOver;
+    if (isGameOver) {
+      currPlayer.incrementScore();
+      winner = currPlayer;
+    }
+
+    isGameTie = board.forEach((row) => {
+      row.forEach((element) => {
+        if (element != null) {
+          return true;
+        }
+      });
+    });
+    console.log(isGameTie);
+    console.log(winner);
   };
 
   function getIsGameTie() {
