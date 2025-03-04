@@ -13,13 +13,10 @@ const GameBoard = (function () {
 
   init(); //runs init function
 
-  return { board };
+  return { board, init };
 })();
 
 const createPlayer = function (name, marker) {
-  // creates a player with name and marker and score initialized to zero
-  // provides incrementScore to add 1 point to player score.
-
   this.name = name;
   this.marker = marker;
   this.score = 0;
@@ -28,7 +25,7 @@ const createPlayer = function (name, marker) {
     return this.score;
   }
 
-  this.incrementScore = () => score++;
+  this.incrementScore = () => this.score++;
   return { name, getScore, incrementScore, marker, score };
 };
 
@@ -99,20 +96,25 @@ const screenController = (function () {
 
     let currPlayer = GameController.getCurrPlayer();
 
+    console.log(currPlayer.name + "'s Turn");
+
     if (GameController.getIsGameOver() == false) {
-      event.target.textContent =
-        event.target.textContent == ""
-          ? currPlayer.marker
-          : event.target.textContent;
-      GameController.playRound(i, j);
+      if (event.target.textContent == "") {
+        event.target.textContent = currPlayer.marker;
+        GameController.playRound(i, j);
+      } else {
+        console.log("already marked!!");
+      }
+    } else if (GameController.getIsGameTie() == true) {
+      console.log("Game Tied");
     } else {
-      alert("Game Over!");
-      alert(`${currPlayer.name} Won!!`);
+      console.log("Game Over!");
+      console.log(`${currPlayer.name} Won!!`);
     }
 
     // console.log(GameController.getIsGameOver());
   };
-
+  // createGameDOM();
   return { createGameDOM };
 })();
 
@@ -136,22 +138,16 @@ const GameController = (function () {
   };
 
   const playRound = function (i, j) {
-    if (winner == null) {
-      if (isGameOver == false || isGameTie == false) {
-        // debugger;
-        if (board[i][j] === null) {
-          board[i][j] = currPlayer.marker;
-          console.table(board);
-          updateGameState();
+    if (isGameOver == false && isGameTie == false) {
+      if (board[i][j] === null) {
+        board[i][j] = currPlayer.marker;
+        updateGameState();
+        if (winner == null) {
           toggleCurrentPlayer();
-        } else {
-          alert("This position is already marked: " + board[i][j]);
         }
       } else {
-        console.log("winner is: " + winner.name);
+        console.log("Illegal Move");
       }
-    } else {
-      alert("Game over and" + currPlayer.name + "Won");
     }
   };
 
@@ -207,19 +203,16 @@ const GameController = (function () {
     isGameOver = rowCompleted || colCompleted || diagonalCompleted;
 
     if (isGameOver) {
-      currPlayer.incrementScore();
       winner = currPlayer;
-    }
 
-    isGameTie = board.forEach((row) => {
-      row.forEach((element) => {
-        if (element != null) {
-          return true;
-        }
-      });
-    });
-    console.log(isGameTie);
-    console.log(winner);
+      currPlayer.incrementScore();
+    } else if (isGameOver == false) {
+      let boardContent = board.flat();
+
+      if (!boardContent.includes(null)) {
+        isGameTie = true;
+      }
+    }
   };
 
   function getIsGameTie() {
