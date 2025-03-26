@@ -25,7 +25,9 @@ const createPlayer = function (name, marker) {
     return this.score;
   }
 
-  this.incrementScore = () => this.score++;
+  function incrementScore() {
+    this.score++;
+  }
   return { name, getScore, incrementScore, marker, score };
 };
 
@@ -98,6 +100,8 @@ const screenController = (function () {
 
     console.log(currPlayer.name + "'s Turn");
 
+    updateScreen();
+
     if (GameController.getIsGameOver() == false) {
       if (event.target.textContent == "") {
         event.target.textContent = currPlayer.marker;
@@ -115,6 +119,12 @@ const screenController = (function () {
     // console.log(GameController.getIsGameOver());
   };
   // createGameDOM();
+  const updateScreen = function () {
+    if (GameController.getIsGameOver()) {
+      alert(GameController.getCurrPlayer().name + "Won!");
+    }
+  };
+
   return { createGameDOM };
 })();
 
@@ -204,13 +214,14 @@ const GameController = (function () {
 
     if (isGameOver) {
       winner = currPlayer;
-
+      // alert(`game over!`);
       currPlayer.incrementScore();
+      console.log(currPlayer.getScore());
     } else if (isGameOver == false) {
       let boardContent = board.flat();
 
       if (!boardContent.includes(null)) {
-        isGameTie = true;
+        isGameTie = isGameOver;
       }
     }
   };
@@ -222,6 +233,7 @@ const GameController = (function () {
   function getCurrPlayer() {
     return currPlayer;
   }
+
   function getIsGameOver() {
     return isGameOver;
   }
