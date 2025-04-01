@@ -83,14 +83,23 @@ main {
   min-height: 98vh;
 }
 button {
-  height: 40px;
-  width: 40px;
+  background: none;
+  border: 1px solid #fff;
+  height: 50px;
+  width: 50px;
+  font-size: 45px;
+  padding: 0;
+  margin: 10px;
+  color: #fff;
+  line-height: 0;
+  text-align: center;
 }
 header {
   height: 10vh;
 }
-.current {
+.active {
   background-color: lightgreen;
+  color: #000;
 }
 .playersContainer {
   display: flex;
@@ -98,4 +107,20 @@ header {
   align-content: center;
   justify-content: center;
   margin: 2rem;
+}
+.reset-btn {
+  width: auto;
+  padding: 10px;
+  margin-top: 2rem;
+  font-size: 25px;
+  border-radius: 5px;
+  background-color: #535329;
+}
+.gameContainer h1 {
+  padding-bottom: 1rem;
+  font-size: 2rem;
+}
+.player-card {
+  padding: 10px 20px;
+  border-radius: 5px;
 }

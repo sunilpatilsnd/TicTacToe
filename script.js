@@ -1,7 +1,11 @@
 const GameBoard = (function () {
-  board = [];
+  let board = [];
+  let name = "Tik-Tak-Toe";
 
-  const init = function () {
+  function init() {
+    while (board.length > 0) {
+      board.pop();
+    }
     for (let i = 0; i < 3; i++) {
       const arr = [];
       for (j = 0; j < 3; j++) {
@@ -9,11 +13,11 @@ const GameBoard = (function () {
       }
       board.push(arr);
     }
-  };
+  }
 
   init(); //runs init function
 
-  return { board, init };
+  return { board, init, name };
 })();
 
 const createPlayer = function (name, marker) {
@@ -46,6 +50,7 @@ const screenController = (function () {
     const playerScore = document.createElement("p");
 
     playerInfo.classList.add("player-card");
+    playerInfo.id = player.name;
 
     playerName.textContent = player.name;
     playerMarker.textContent = `marker: ${player.marker}`;
@@ -63,10 +68,12 @@ const screenController = (function () {
     const boardContainer = document.createElement("div");
     const boardName = document.createElement("h1");
 
-    boardContainer.id = board.name;
-    boardName.textContent = board.name;
+    boardContainer.id = GameBoard.name;
+    boardName.textContent = GameBoard.name;
 
-    boardContainer.appendChild(boardName);
+    container.appendChild(boardName);
+
+    boardContainer.id = "board";
 
     const rowLength = board.length;
     const colLength = board.length;
@@ -90,6 +97,12 @@ const screenController = (function () {
     }
 
     container.appendChild(boardContainer);
+
+    const resetBtn = document.createElement("button");
+    resetBtn.textContent = "Reset";
+    resetBtn.classList.add("reset-btn");
+    resetBtn.addEventListener("click", resetBoardDOM);
+    container.appendChild(resetBtn);
   };
 
   const playTurn = function (event) {
@@ -99,8 +112,6 @@ const screenController = (function () {
     let currPlayer = GameController.getCurrPlayer();
 
     console.log(currPlayer.name + "'s Turn");
-
-    updateScreen();
 
     if (GameController.getIsGameOver() == false) {
       if (event.target.textContent == "") {
@@ -113,26 +124,53 @@ const screenController = (function () {
       console.log("Game Tied");
     } else {
       console.log("Game Over!");
-      console.log(`${currPlayer.name} Won!!`);
+      console.log(`${currPlayer.name}  Won!!`);
     }
 
     // console.log(GameController.getIsGameOver());
   };
   // createGameDOM();
-  const updateScreen = function () {
-    if (GameController.getIsGameOver()) {
-      alert(GameController.getCurrPlayer().name + "Won!");
+  const updateDOM = function () {
+    let gameOver = GameController.getIsGameOver();
+
+    updatePlayerDOM();
+
+    if (gameOver == true) {
+      alert(GameController.getCurrPlayer().name + " Won!");
     }
   };
 
-  return { createGameDOM };
+  const updatePlayerDOM = function () {
+    //Toggle CSS for active players
+    let allPlayers = document.querySelectorAll(`.player-card`);
+
+    allPlayers.forEach((player) => {
+      player.classList.remove("active"); //removes active class for all players
+    });
+
+    let currPlayer = GameController.getCurrPlayer();
+    let currTurn = document.querySelector(`#${currPlayer.name}`);
+
+    currTurn.classList.add(`active`); //add active class for current active player
+    currTurn.lastChild.textContent = GameController.getCurrPlayer().getScore(); //updates score
+  };
+
+  const resetBoardDOM = function () {
+    const board = document.querySelector(`#board`);
+    const boartBtns = board.querySelectorAll(`button`);
+    boartBtns.forEach((btn) => (btn.textContent = null));
+    GameController.resetGame();
+  };
+
+  return { createGameDOM, updateDOM, resetBoardDOM };
 })();
 
 const GameController = (function () {
   const board = GameBoard.board;
+
   // console.table(board);
-  const player1 = createPlayer("SuperMan", "X");
-  const player2 = createPlayer("Batman", "O");
+  const player1 = createPlayer("Player-1", "X");
+  const player2 = createPlayer("Player-2", "O");
   let winner = null;
 
   let isGameOver = false;
@@ -152,6 +190,7 @@ const GameController = (function () {
       if (board[i][j] === null) {
         board[i][j] = currPlayer.marker;
         updateGameState();
+        screenController.updateDOM();
         if (winner == null) {
           toggleCurrentPlayer();
         }
@@ -216,12 +255,13 @@ const GameController = (function () {
       winner = currPlayer;
       // alert(`game over!`);
       currPlayer.incrementScore();
-      console.log(currPlayer.getScore());
     } else if (isGameOver == false) {
       let boardContent = board.flat();
 
-      if (!boardContent.includes(null)) {
-        isGameTie = isGameOver;
+      if (boardContent.includes(null)) {
+        isGameTie = false;
+      } else {
+        isGameTie = true;
       }
     }
   };
@@ -237,6 +277,15 @@ const GameController = (function () {
   function getIsGameOver() {
     return isGameOver;
   }
+  function resetGame() {
+    GameBoard.init();
+    winner = null;
+
+    isGameOver = false;
+    isGameTie = false;
+
+    let currPlayer = player1;
+  }
 
   return {
     toggleCurrentPlayer,
@@ -244,5 +293,6 @@ const GameController = (function () {
     getCurrPlayer,
     getIsGameOver,
     getIsGameTie,
+    resetGame,
   };
 })();
