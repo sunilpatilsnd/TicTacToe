@@ -132,11 +132,12 @@ const screenController = (function () {
   // createGameDOM();
   const updateDOM = function () {
     let gameOver = GameController.getIsGameOver();
+    let currPlayer = GameController.getCurrPlayer();
 
     updatePlayerDOM();
 
     if (gameOver == true) {
-      alert(GameController.getCurrPlayer().name + " Won!");
+      shoWResultDOM(currPlayer.name);
     }
   };
 
@@ -152,7 +153,7 @@ const screenController = (function () {
     let currTurn = document.querySelector(`#${currPlayer.name}`);
 
     currTurn.classList.add(`active`); //add active class for current active player
-    currTurn.lastChild.textContent = GameController.getCurrPlayer().getScore(); //updates score
+    currTurn.lastChild.textContent = `Score: ${GameController.getCurrPlayer().getScore()}`; //updates score
   };
 
   const resetBoardDOM = function () {
@@ -160,6 +161,20 @@ const screenController = (function () {
     const boartBtns = board.querySelectorAll(`button`);
     boartBtns.forEach((btn) => (btn.textContent = null));
     GameController.resetGame();
+  };
+
+  const shoWResultDOM = function (player) {
+    const result = document.querySelector(".resultContainer");
+    const resultText = document.createElement("p");
+
+    result.appendChild(resultText);
+    debugger;
+    while (result.firstChild) {
+      result.removeChild(result.firstChild);
+    }
+
+    resultText.textContent = `${player} Won!`;
+    result.appendChild(resultText);
   };
 
   return { createGameDOM, updateDOM, resetBoardDOM };
