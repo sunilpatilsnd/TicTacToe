@@ -295,11 +295,13 @@ const GameController = (function () {
   function resetGame() {
     GameBoard.init();
     winner = null;
-
     isGameOver = false;
     isGameTie = false;
-
     let currPlayer = player1;
+  }
+
+  function changePlayerName(player, newName) {
+    player.name = newName;
   }
 
   return {
@@ -309,5 +311,6 @@ const GameController = (function () {
     getIsGameOver,
     getIsGameTie,
     resetGame,
+    changePlayerName,
   };
 })();
