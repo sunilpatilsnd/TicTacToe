@@ -35,6 +35,8 @@ const createPlayer = function (name, marker) {
   return { name, getScore, incrementScore, marker, score };
 };
 
+// UI controller Starts
+
 const screenController = (function () {
   const createGameDOM = function (player1, player2, board) {
     createGameBoardUI(board);
@@ -49,6 +51,10 @@ const screenController = (function () {
     const playerMarker = document.createElement("h3");
     const playerScore = document.createElement("p");
 
+    const nameEditor = document.createElement("button");
+
+    nameEditor.textContent = "Edit";
+
     playerInfo.classList.add("player-card");
     playerInfo.id = player.name;
 
@@ -59,8 +65,13 @@ const screenController = (function () {
     playerInfo.appendChild(playerName);
     playerInfo.appendChild(playerMarker);
     playerInfo.appendChild(playerScore);
+    playerName.appendChild(nameEditor);
 
     container.appendChild(playerInfo);
+
+    nameEditor.addEventListener("click", () => {
+      updatePlayerNameDOM(player);
+    });
   };
 
   const createGameBoardUI = function (board) {
@@ -168,7 +179,7 @@ const screenController = (function () {
     const resultText = document.createElement("p");
 
     result.appendChild(resultText);
-    debugger;
+
     while (result.firstChild) {
       result.removeChild(result.firstChild);
     }
@@ -177,8 +188,39 @@ const screenController = (function () {
     result.appendChild(resultText);
   };
 
+  const updatePlayerNameDOM = function (player) {
+    const dialog = document.querySelector("dialog");
+    dialog.querySelector("#playerName").value = player.name;
+    dialog.showModal();
+
+    dialog.querySelector(".close").addEventListener("click", () => {});
+
+    const submitBtn = dialog.querySelector("#changeName");
+
+    console.log(submitBtn);
+
+    submitBtn.addEventListener("click", (e) => {
+      e.preventDefault();
+      handleFormData(player);
+    });
+  };
+
+  function handleFormData(player) {
+    const dialog = document.querySelector("dialog");
+    const newName = dialog.querySelector("#playerName").value;
+
+    GameController.changePlayerName(player, newName);
+    dialog.close();
+  }
+
+  const handleFormDate = function () {};
+
   return { createGameDOM, updateDOM, resetBoardDOM };
 })();
+
+// UI controller Ends
+
+// Game Controller starts
 
 const GameController = (function () {
   const board = GameBoard.board;
@@ -300,8 +342,10 @@ const GameController = (function () {
     let currPlayer = player1;
   }
 
-  function changePlayerName(player, newName) {
-    player.name = newName;
+  function changePlayerName(selectedPlayer, newName) {
+    selectedPlayer.name = newName;
+    console.log(selectedPlayer);
+    return true;
   }
 
   return {
@@ -312,5 +356,7 @@ const GameController = (function () {
     getIsGameTie,
     resetGame,
     changePlayerName,
+    player1,
+    player2,
   };
 })();
