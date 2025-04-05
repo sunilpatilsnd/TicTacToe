@@ -189,20 +189,36 @@ const screenController = (function () {
   };
 
   const updatePlayerNameDOM = function (player) {
+    let selectedPlayerID = player.name;
+
+    console.log(selectedPlayerID);
+
     const dialog = document.querySelector("dialog");
     dialog.querySelector("#playerName").value = player.name;
     dialog.showModal();
 
-    dialog.querySelector(".close").addEventListener("click", () => {});
-
-    const submitBtn = dialog.querySelector("#changeName");
-
-    console.log(submitBtn);
-
-    submitBtn.addEventListener("click", (e) => {
-      e.preventDefault();
-      handleFormData(player);
+    dialog.querySelector(".close").addEventListener("click", () => {
+      dialog.close();
     });
+
+    console.log(player.name + "Inside dialogue open");
+
+    const form = dialog.querySelector("form");
+
+    form.addEventListener("submit", handleSubmit, true);
+
+    function handleSubmit(event) {
+      handleFormData(player);
+      event.preventDefault();
+      console.log(player.name + "Inside Submit");
+
+      let a = document.querySelector(`#${selectedPlayerID}`);
+      console.log(a);
+
+      a.id = player.name;
+      a.querySelector("h2").textContent = player.name;
+      form.removeEventListener("submit", handleSubmit, false);
+    }
   };
 
   function handleFormData(player) {
@@ -212,8 +228,6 @@ const screenController = (function () {
     GameController.changePlayerName(player, newName);
     dialog.close();
   }
-
-  const handleFormDate = function () {};
 
   return { createGameDOM, updateDOM, resetBoardDOM };
 })();
@@ -343,9 +357,9 @@ const GameController = (function () {
   }
 
   function changePlayerName(selectedPlayer, newName) {
+    console.log(selectedPlayer.name + "inside GameController");
     selectedPlayer.name = newName;
     console.log(selectedPlayer);
-    return true;
   }
 
   return {
