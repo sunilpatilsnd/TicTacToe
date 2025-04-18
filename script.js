@@ -20,7 +20,8 @@ const GameBoard = (function () {
   return { board, init, name };
 })();
 
-const createPlayer = function (name, marker) {
+const createPlayer = function (name, marker, id) {
+  this.id = id;
   this.name = name;
   this.marker = marker;
   this.score = 0;
@@ -32,7 +33,7 @@ const createPlayer = function (name, marker) {
   function incrementScore() {
     this.score++;
   }
-  return { name, getScore, incrementScore, marker, score };
+  return { name, getScore, incrementScore, marker, score, id };
 };
 
 // UI controller Starts
@@ -56,7 +57,7 @@ const screenController = (function () {
     nameEditor.textContent = "Edit";
 
     playerInfo.classList.add("player-card");
-    playerInfo.id = player.name;
+    playerInfo.id = player.id;
 
     playerName.textContent = player.name;
     playerMarker.textContent = `marker: ${player.marker}`;
@@ -69,9 +70,14 @@ const screenController = (function () {
 
     container.appendChild(playerInfo);
 
-    nameEditor.addEventListener("click", () => {
-      updatePlayerNameDOM(player);
-    });
+    nameEditor.addEventListener(
+      "click",
+      (event) => {
+        updatePlayerNameDOM(player);
+        nameEditor.removeEventListener("click", this.event, true);
+      },
+      true
+    );
   };
 
   const createGameBoardUI = function (board) {
@@ -161,7 +167,7 @@ const screenController = (function () {
     });
 
     let currPlayer = GameController.getCurrPlayer();
-    let currTurn = document.querySelector(`#${currPlayer.name}`);
+    let currTurn = document.querySelector(`#${currPlayer.id}`);
 
     currTurn.classList.add(`active`); //add active class for current active player
     currTurn.lastChild.textContent = `Score: ${GameController.getCurrPlayer().getScore()}`; //updates score
@@ -189,7 +195,7 @@ const screenController = (function () {
   };
 
   const updatePlayerNameDOM = function (player) {
-    let selectedPlayerID = player.name;
+    const selectedPlayerID = player.id;
 
     console.log(selectedPlayerID);
 
@@ -197,9 +203,14 @@ const screenController = (function () {
     dialog.querySelector("#playerName").value = player.name;
     dialog.showModal();
 
-    dialog.querySelector(".close").addEventListener("click", () => {
-      dialog.close();
-    });
+    dialog.querySelector(".close").addEventListener(
+      "click",
+      () => {
+        dialog.close();
+        dialog.removeEventListener("click", this.event, true);
+      },
+      true
+    );
 
     console.log(player.name + "Inside dialogue open");
 
@@ -213,11 +224,9 @@ const screenController = (function () {
       console.log(player.name + "Inside Submit");
 
       let a = document.querySelector(`#${selectedPlayerID}`);
-      console.log(a);
 
-      a.id = player.name;
       a.querySelector("h2").textContent = player.name;
-      form.removeEventListener("submit", handleSubmit, false);
+      form.removeEventListener("submit", handleSubmit, true);
     }
   };
 
@@ -240,8 +249,8 @@ const GameController = (function () {
   const board = GameBoard.board;
 
   // console.table(board);
-  const player1 = createPlayer("Player-1", "X");
-  const player2 = createPlayer("Player-2", "O");
+  const player1 = createPlayer("Player-1", "X", "player-1");
+  const player2 = createPlayer("Player-2", "O", "player-2");
   let winner = null;
 
   let isGameOver = false;

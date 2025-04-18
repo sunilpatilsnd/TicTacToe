@@ -133,8 +133,11 @@ header {
 dialog {
   margin: 20vh auto;
   padding: 3rem 3rem 2rem 3rem;
+  border-radius: 10px;
 }
-
+dialog::backdrop {
+  background: rgba(0, 0, 0, 0.69);
+}
 dialog button {
   background-color: #000;
   color: #fff;
@@ -146,13 +149,13 @@ dialog button {
 }
 .close {
   position: absolute;
-  height: 20px;
-  width: 20px;
-  line-height: 0;
-  border-radius: 50%;
-  padding: 20px;
-  border: 1px solid #fff;
   top: 0;
   right: 0;
-  margin: auto;
+}
+dialog h2 {
+  padding-bottom: 1rem;
+}
+dialog label {
+  font-weight: bold;
+  padding-right: 5px;
 }
