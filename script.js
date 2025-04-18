@@ -203,15 +203,6 @@ const screenController = (function () {
     dialog.querySelector("#playerName").value = player.name;
     dialog.showModal();
 
-    dialog.querySelector(".close").addEventListener(
-      "click",
-      () => {
-        dialog.close();
-        dialog.removeEventListener("click", this.event, true);
-      },
-      true
-    );
-
     console.log(player.name + "Inside dialogue open");
 
     const form = dialog.querySelector("form");
